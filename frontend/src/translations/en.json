@@ -1,0 +1,74 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "about": "About Us",
+    "contact": "Contact",
+    "login": "Login",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "logout": "Logout",
+    "cart": "Cart"
+  },
+  "home": {
+    "heroTitle": "Directly from the Loom to Your Home",
+    "heroSubtitle": "Discover exquisite, authenticated handloom garments and support rural Indian artisans directly without middle-men.",
+    "shopNow": "Shop Collection",
+    "artisanRegister": "Join as Artisan",
+    "featuredCategories": "Featured Categories",
+    "featuredProducts": "Featured Products",
+    "featuredArtisans": "Featured Artisans",
+    "viewProfile": "View Profile",
+    "experience": "Years Experience",
+    "testimonials": "What Our Patrons Say",
+    "impactTitle": "Our Community Impact",
+    "impactEarnings": "Artisan Income Growth",
+    "impactCrafts": "Traditional Crafts Promoted",
+    "impactEmpower": "Digital Empowerment",
+    "impactJobs": "Employment Generated",
+    "successStories": "Weaver Success Stories"
+  },
+  "products": {
+    "title": "Explore Indian Handlooms",
+    "search": "Search products...",
+    "category": "Category",
+    "all": "All Categories",
+    "priceRange": "Price Range",
+    "filter": "Apply Filters",
+    "clear": "Clear Filters",
+    "noProducts": "No products match your criteria.",
+    "price": "Price",
+    "stock": "In Stock",
+    "outOfStock": "Out of Stock",
+    "addToCart": "Add to Cart",
+    "buyNow": "Buy Now"
+  },
+  "details": {
+    "reviews": "Reviews & Ratings",
+    "noReviews": "No reviews yet. Be the first to review!",
+    "writeReview": "Write a Review",
+    "rating": "Rating",
+    "comment": "Comment",
+    "submit": "Submit Review",
+    "artisanInfo": "Meet the Artisan",
+    "experience": "Experience:"
+  },
+  "cart": {
+    "title": "Your Shopping Cart",
+    "empty": "Your cart is empty.",
+    "total": "Total Amount",
+    "checkout": "Proceed to Payment",
+    "remove": "Remove"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "customerSignUp": "Customer Sign Up",
+    "artisanSignUp": "Artisan Sign Up",
+    "email": "Email Address",
+    "password": "Password",
+    "rememberMe": "Remember Me",
+    "noAccount": "Don't have an account?",
+    "registerHere": "Register here",
+    "artisanRegisterPrompt": "Are you a weaver? Register as an Artisan"
+  }
+}
