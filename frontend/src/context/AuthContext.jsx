@@ -7,8 +7,8 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('handloom_token') || null);
   const [loading, setLoading] = useState(true);
 
-  // Define backend base URL
-  const API_URL = 'http://localhost:5001/api';
+  // Define backend base URL (Live Render Production)
+  const API_URL = 'https://handloom-artisan-platform-2.onrender.com/api';
 
   useEffect(() => {
     const fetchProfile = async () => {
