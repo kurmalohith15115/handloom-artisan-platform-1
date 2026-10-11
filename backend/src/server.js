@@ -1,58 +1,100 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-require('dotenv').config();
+const fs = require('fs');
+const connectDB = require('./config/db');
 
-const authRoutes = require('./routes/authRoutes');
-const productRoutes = require('./routes/productRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-const reviewRoutes = require('./routes/reviewRoutes');
+// Models (loaded so mongoose handles registration)
+require('./models/user');
+require('./models/artisanProfile');
+require('./models/product');
+require('./models/order');
+require('./models/review');
 
+// Initialize app
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// Enable CORS with credentials and specified allowed origins
-app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:3000", "https://handloom-artisan-platform-1.vercel.app"],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// Connect database and safely bootstrap/reset the admin account when explicitly configured.
+async function initializeApplication() {
+  await connectDB();
 
-// Express built-in body parsing middleware
+  const User = require('./models/user');
+  const adminEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  const resetPassword = process.env.ADMIN_RESET_PASSWORD;
+
+  // Only create an admin when both base credentials are provided.
+  if (adminEmail && adminPassword) {
+    try {
+      let admin = await User.findOne({ email: adminEmail });
+
+      if (!admin) {
+        admin = new User({
+          username: (process.env.ADMIN_USERNAME || 'admin').trim(),
+          email: adminEmail,
+          password: adminPassword,
+          role: 'admin',
+          status: 'approved'
+        });
+        await admin.save();
+        console.log('Admin bootstrap: created configured admin account.');
+      } else if (resetPassword) {
+        // Explicit reset path for an existing account. Remove ADMIN_RESET_PASSWORD
+        // from Render after a successful login so it is not reapplied on every restart.
+        admin.password = resetPassword;
+        admin.role = 'admin';
+        admin.status = 'approved';
+        await admin.save();
+        console.log('Admin bootstrap: reset configured admin account password.');
+      } else {
+        console.log('Admin bootstrap: configured email already exists; no password changed.');
+      }
+    } catch (error) {
+      console.error('Admin bootstrap failed:', error.message);
+    }
+  } else if (adminEmail || adminPassword) {
+    console.warn('Admin bootstrap skipped: set both ADMIN_EMAIL and ADMIN_PASSWORD.');
+  }
+}
+
+// Express Middlewares
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check endpoint (for Render ping)
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'Handloom Artisan Platform API is running' });
-});
+// Create public upload directory if it does not exist
+const uploadDir = path.join(__dirname, '../public/uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
-// API Routes FIRST
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/reviews', reviewRoutes);
+// Serve Static Files
+app.use(express.static(path.join(__dirname, '../public')));
 
-// Root URL welcome message
-app.get('/', (req, res) => {
-  res.send('Welcome to the Handloom Artisan Support Platform Server API!');
-});
+// Define Route Paths
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/artisans', require('./routes/artisans'));
+app.use('/api/products', require('./routes/products'));
+app.use('/api/reviews', require('./routes/reviews'));
+app.use('/api/orders', require('./routes/orders'));
+app.use('/api/admin', require('./routes/admin'));
 
-// Wildcard 404 handler for /api requests
-app.use((req, res, next) => {
+// Fallback for HTML routing (cleaner URLs)
+app.get('*', (req, res, next) => {
+  // If request wants API, return 404 json
   if (req.originalUrl.startsWith('/api')) {
-    return res.status(404).json({ success: false, message: "API Endpoint not found." });
+    return res.status(404).json({ success: false, message: 'API Endpoint not found.' });
   }
-  next();
+  // Otherwise, let static serve or return index.html
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-// Global Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('[Global Error Middleware]:', err.stack);
-  res.status(500).json({ message: 'Internal Server Error' });
-});
+// Port configuration
+const PORT = process.env.PORT || 5001;
 
-app.listen(PORT, () => {
-  console.log(`[Server] Handloom API Server running on port ${PORT}`);
+initializeApplication().finally(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  });
 });
